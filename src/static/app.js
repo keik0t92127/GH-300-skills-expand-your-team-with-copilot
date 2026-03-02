@@ -15,6 +15,31 @@ document.addEventListener("DOMContentLoaded", () => {
   const dayFilters = document.querySelectorAll(".day-filter");
   const timeFilters = document.querySelectorAll(".time-filter");
 
+  // Dark mode toggle
+  const darkModeToggle = document.getElementById("dark-mode-toggle");
+
+  function applyDarkMode(enabled) {
+    if (enabled) {
+      document.body.classList.add("dark-mode");
+      darkModeToggle.textContent = "☀️";
+      darkModeToggle.setAttribute("aria-label", "Switch to light mode");
+    } else {
+      document.body.classList.remove("dark-mode");
+      darkModeToggle.textContent = "🌙";
+      darkModeToggle.setAttribute("aria-label", "Switch to dark mode");
+    }
+  }
+
+  // Load saved preference
+  applyDarkMode(localStorage.getItem("darkMode") === "true");
+
+  darkModeToggle.addEventListener("click", () => {
+    const isDark = document.body.classList.toggle("dark-mode");
+    localStorage.setItem("darkMode", isDark);
+    darkModeToggle.textContent = isDark ? "☀️" : "🌙";
+    darkModeToggle.setAttribute("aria-label", isDark ? "Switch to light mode" : "Switch to dark mode");
+  });
+
   // Authentication elements
   const loginButton = document.getElementById("login-button");
   const userInfo = document.getElementById("user-info");
