@@ -552,6 +552,21 @@ document.addEventListener("DOMContentLoaded", () => {
             .join("")}
         </ul>
       </div>
+      <div class="share-buttons">
+        <span class="share-label">Share:</span>
+        <button class="share-btn share-twitter tooltip" data-activity="${name}" aria-label="Share on X (Twitter)">
+          𝕏
+          <span class="tooltip-text">Share on X (Twitter)</span>
+        </button>
+        <button class="share-btn share-whatsapp tooltip" data-activity="${name}" aria-label="Share on WhatsApp">
+          💬
+          <span class="tooltip-text">Share on WhatsApp</span>
+        </button>
+        <button class="share-btn share-copy tooltip" data-activity="${name}" aria-label="Copy link">
+          🔗
+          <span class="tooltip-text">Copy link</span>
+        </button>
+      </div>
       <div class="activity-card-actions">
         ${
           currentUser
@@ -575,6 +590,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const deleteButtons = activityCard.querySelectorAll(".delete-participant");
     deleteButtons.forEach((button) => {
       button.addEventListener("click", handleUnregister);
+    });
+
+    // Add click handlers for share buttons
+    activityCard.querySelector(".share-twitter").addEventListener("click", () => {
+      shareActivity(name, details.description, "twitter");
+    });
+    activityCard.querySelector(".share-whatsapp").addEventListener("click", () => {
+      shareActivity(name, details.description, "whatsapp");
+    });
+    activityCard.querySelector(".share-copy").addEventListener("click", (e) => {
+      shareActivity(name, details.description, "copy", e.currentTarget);
     });
 
     // Add click handler for register button (only when authenticated)
@@ -797,6 +823,52 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
     );
+  }
+
+  // Share activity on social media or copy link
+  function shareActivity(name, description, platform, buttonEl) {
+    const shareText = `Check out this activity at Mergington High School: ${name} - ${description}`;
+    const shareUrl = window.location.href;
+
+    if (platform === "twitter") {
+      const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
+      window.open(twitterUrl, "_blank", "noopener,noreferrer");
+    } else if (platform === "whatsapp") {
+      const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareText + " " + shareUrl)}`;
+      window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+    } else if (platform === "copy") {
+      const textToCopy = shareText + " " + shareUrl;
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(textToCopy).then(() => {
+          const originalText = buttonEl.innerHTML;
+          buttonEl.textContent = "✓";
+          setTimeout(() => {
+            buttonEl.innerHTML = originalText;
+          }, 1500);
+        }).catch(() => {
+          showMessage("Could not copy link. Please try again.", "error");
+        });
+      } else {
+        // Fallback for non-secure contexts
+        const textarea = document.createElement("textarea");
+        textarea.value = textToCopy;
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+          document.execCommand("copy");
+          const originalText = buttonEl.innerHTML;
+          buttonEl.textContent = "✓";
+          setTimeout(() => {
+            buttonEl.innerHTML = originalText;
+          }, 1500);
+        } catch {
+          showMessage("Could not copy link. Please try again.", "error");
+        }
+        document.body.removeChild(textarea);
+      }
+    }
   }
 
   // Show message function
